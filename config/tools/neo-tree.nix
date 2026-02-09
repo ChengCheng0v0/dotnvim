@@ -116,5 +116,18 @@
     })
   ];
 
+  autoCmd = [
+    {
+      group = "HackFix";
+      desc = "Refresh Git status in Neo-tree when switching tabs";
+      event = "TabEnter";
+      callback.__raw = /* lua */ ''
+        function()
+          require('neo-tree.events').fire_event('git_event')
+        end
+      '';
+    }
+  ];
+
   colorschemes.catppuccin.settings.integrations.neo-tree = true;
 }
