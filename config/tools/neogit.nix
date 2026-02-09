@@ -19,6 +19,12 @@
           "'"
         ];
       };
+
+      mappings = {
+        status = {
+          "<space>" = "Toggle";
+        };
+      };
     };
   };
 
