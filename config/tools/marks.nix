@@ -1,0 +1,125 @@
+{ lib', ... }:
+
+{
+  plugins.marks = {
+    enable = true;
+
+    settings = {
+      default_mappings = false;
+
+      sign_priority = {
+        builtin = 5;
+        lower = 8;
+        upper = 15;
+        bookmark = 20;
+      };
+
+      builtin_marks = [
+        "."
+        "<"
+        ">"
+        "^"
+      ];
+    };
+  };
+
+  plugins.which-key.settings.spec = with lib'.utils.wk; [
+    (mkSpec
+      [
+        "m"
+        { __raw = "require('d.mark_operator')"; }
+      ]
+      {
+        desc = "Mark...";
+        icon = {
+          icon = lib'.icons.common.Bookmarks.fill;
+          color = "orange";
+        };
+        mode = modes.operator;
+      }
+    )
+
+    (mkSpec
+      [
+        "<A-]>"
+        { __raw = "require('marks').next"; }
+      ]
+      {
+        desc = "Move to Next Mark";
+        mode = modes.full;
+      }
+    )
+    (mkSpec
+      [
+        "<A-[>"
+        { __raw = "require('marks').prev"; }
+      ]
+      {
+        desc = "Move to Previous Mark";
+        mode = modes.full;
+      }
+    )
+
+    (mkSpec
+      [
+        "m,"
+        { __raw = "require('marks').set_next"; }
+      ]
+      {
+        desc = "Set Available Mark";
+        icon = {
+          icon = lib'.icons.common.BookmarkPlus.fill;
+          color = "orange";
+        };
+        mode = modes.interact;
+      }
+    )
+    (mkSpec
+      [
+        "m;"
+        { __raw = "require('marks').toggle"; }
+      ]
+      {
+        desc = "Toggle Line Mark";
+        icon = {
+          icon = lib'.icons.common.BookmarkMinus.fill;
+          color = "orange";
+        };
+        mode = modes.interact;
+      }
+    )
+    (mkSpec
+      [
+        "m:"
+        { __raw = "require('marks').preview"; }
+      ]
+      {
+        desc = "Preview Mark";
+        icon = {
+          icon = lib'.icons.common.Bookmark.fill;
+          color = "orange";
+        };
+        mode = modes.interact;
+      }
+    )
+  ];
+
+  autoCmd = [
+    {
+      group = "HighlightSet";
+      desc = "Clear the MarkSignNumHL highlight group to disable highlighting marked line numbers";
+      event = "VimEnter";
+      callback.__raw = /* lua */ ''
+        function()
+          vim.api.nvim_set_hl(0, 'MarkSignNumHL', {})
+        end
+      '';
+    }
+  ];
+
+  extraConfigLua = /* lua */ ''
+    local hl = vim.api.nvim_get_hl(0, { name = 'Character' })
+    hl.italic = true
+    vim.api.nvim_set_hl(0, 'MarkSignHL', hl)
+  '';
+}

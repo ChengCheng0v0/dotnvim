@@ -1,0 +1,5 @@
+{
+  plugins.schemastore = {
+    enable = true;
+  };
+}
