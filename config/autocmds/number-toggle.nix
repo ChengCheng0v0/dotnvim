@@ -1,13 +1,7 @@
 {
-  autoGroups = {
-    NumberToggle = {
-      clear = true;
-    };
-  };
-
   autoCmd = [
     {
-      group = "NumberToggle";
+      group = "Auto";
       event = "CmdlineEnter";
       pattern = "*";
       callback.__raw = /* lua */ ''
@@ -23,7 +17,7 @@
     }
 
     {
-      group = "NumberToggle";
+      group = "Auto";
       event = "CmdlineLeave";
       pattern = "*";
       callback.__raw = /* lua */ ''

@@ -1,14 +1,18 @@
 {
   autoGroups = {
+    Auto = {
+      clear = true;
+    };
+
     Lazy = {
       clear = true;
     };
 
-    HighlightSet = {
+    HackFix = {
       clear = true;
     };
 
-    HackFix = {
+    HighlightSet = {
       clear = true;
     };
   };
