@@ -8,7 +8,7 @@ pkgs.mkShell {
   packages = with pkgs; [
     nil
     statix
-    nixfmt-rfc-style
+    nixfmt
     stylua
     prettier
   ];
