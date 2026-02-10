@@ -11,7 +11,12 @@
   };
 
   outputs =
-    inputs@{ self, flake-parts, ... }:
+    inputs@{
+      self,
+      flake-parts,
+      nixpkgs,
+      ...
+    }:
     flake-parts.lib.mkFlake { inherit self inputs; } {
       systems = [
         "x86_64-linux"
@@ -26,9 +31,17 @@
         nixvimModules.default =
           { pkgs, ... }:
           {
-            imports = [ ./config ];
             _module.args.lib' = import ./lib { inherit (pkgs) lib; };
+
+            imports = [
+              ./options
+              ./config
+            ];
           };
+
+        overlays = {
+          default = import ./overlays { inherit (nixpkgs) lib; };
+        };
       };
 
       perSystem =
@@ -38,10 +51,11 @@
           ...
         }:
         let
-          pkgs = import inputs.nixpkgs {
+          pkgs = import nixpkgs {
             inherit system;
             overlays = [
               inputs.neovim-nightly-overlay.overlays.default
+              self.overlays.default
             ];
           };
 
@@ -50,13 +64,15 @@
             module = self.nixvimModules.default;
           };
         in
-        rec {
+        {
+          _module.args.pkgs = pkgs;
+
           packages = {
             default = nvim;
           };
 
           apps = {
-            default = apps.nvim;
+            default = config.apps.nvim;
 
             nvim = {
               type = "app";
