@@ -79,7 +79,7 @@
   colorschemes.catppuccin.settings.integrations.bufferline = true;
   plugins.bufferline.settings.highlights.__raw = /* lua */ ''
     (function()
-      if (vim.g.colors_name or ""):find('catppuccin') then
+      if (vim.g.colors_name or '''):find('catppuccin') then
         return require('catppuccin.special.bufferline').get_theme()
       else
         return nil

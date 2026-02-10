@@ -168,7 +168,7 @@ with lib.nixvim.utils;
   colorschemes.catppuccin.settings.special.lualine = true;
   plugins.lualine.settings.options.theme.__raw = /* lua */ ''
     (function()
-      if (vim.g.colors_name or ""):find('catppuccin') then
+      if (vim.g.colors_name or '''):find('catppuccin') then
         return 'catppuccin'
       else
         return 'auto'
