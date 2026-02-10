@@ -13,4 +13,11 @@ function M.lazy_require(module_path)
   })
 end
 
+--- @param module_path string
+--- @return boolean
+function M.has_module(module_path)
+  local ok, _ = pcall(require, module_path)
+  return ok
+end
+
 return M
