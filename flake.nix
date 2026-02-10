@@ -50,12 +50,23 @@
             module = self.nixvimModules.default;
           };
         in
-        {
-          packages.default = nvim;
+        rec {
+          packages = {
+            default = nvim;
+          };
 
-          apps.default = {
-            type = "app";
-            program = "${nvim}/bin/nvim";
+          apps = {
+            default = apps.nvim;
+
+            nvim = {
+              type = "app";
+              program = "${nvim}/bin/nvim";
+            };
+
+            nixvim-print-init = {
+              type = "app";
+              program = "${nvim}/bin/nixvim-print-init";
+            };
           };
         };
     };
