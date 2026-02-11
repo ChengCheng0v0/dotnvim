@@ -85,6 +85,7 @@
         {
           desc = "Escape and Clear hlsearch";
           mode = modes.view;
+          expr = true;
         }
       )
 
@@ -102,6 +103,7 @@
         {
           desc = "Scroll Forward";
           mode = modes.view;
+          expr = true;
         }
       )
       (mkSpec
@@ -118,6 +120,7 @@
         {
           desc = "Scroll Backward";
           mode = modes.full;
+          expr = true;
         }
       )
 
