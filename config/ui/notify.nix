@@ -18,7 +18,7 @@
         TRACE = Trace.fill;
       };
 
-      render.__raw = "require('d.custom_notify_render')";
+      render.__raw = "require('d.notify_render')";
     };
   };
 

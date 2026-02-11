@@ -29,7 +29,7 @@
         prompt_prefix = icons.prompt.Input.line + " ";
         selection_caret = icons.prompt.ListSelection.line + " ";
 
-        create_layout.__raw = "require('d.custom_telescope_layout')";
+        create_layout.__raw = "require('d.telescope_layout')";
 
         mappings = {
           i = {
