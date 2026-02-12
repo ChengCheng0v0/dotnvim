@@ -223,6 +223,7 @@ local actions = {
     elements.ActionButton('󱡠  Find Files', 'f', '<leader>ff'),
     elements.ActionButton('󱡠  Live Grep', '/', '<leader>fg'),
     elements.ActionButton('󰊢  Neogit', 'g', '<leader>gg'),
+    elements.ActionButton('󰆓  Last Session', 's', '<leader>qs'),
     elements.ActionButton('󰈆  Quit', 'q', '<leader>qq'),
   },
 

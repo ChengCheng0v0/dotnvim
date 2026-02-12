@@ -44,5 +44,16 @@
 
     foldlevel = 256;
     foldlevelstart = 256;
+
+    sessionoptions = [
+      "globals"
+      "buffers"
+      "tabpages"
+      "winsize"
+      "skiprtp"
+      "curdir"
+      # "folds"
+      "help"
+    ];
   };
 }

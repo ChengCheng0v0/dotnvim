@@ -314,7 +314,7 @@
         mode = modes.interact;
       })
       (mkSpec [ "<leader>qQ" "<cmd>qa!<cr>" ] {
-        desc = "Quit All (Do Not Save)";
+        desc = "Quit All (Don't Save)";
         mode = modes.interact;
       })
 
