@@ -5,7 +5,7 @@
     settings = {
       enabled.__raw = /* lua */ ''
         function()
-          return not vim.tbl_contains({ "test", "markdown" }, vim.bo.filetype)
+          return not vim.tbl_contains({ "text" }, vim.bo.filetype)
         end
       '';
 
