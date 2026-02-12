@@ -1,0 +1,71 @@
+{ lib', ... }:
+
+{
+  plugins.flash = {
+    enable = true;
+
+    settings = {
+      labels = "asdfghjklqwertyuiopzxcvbnm";
+
+      label = {
+        rainbow = {
+          enabled = true;
+          shade = 9;
+        };
+      };
+
+      modes = {
+        search = {
+          enabled = true;
+        };
+
+        char = {
+          enabled = true;
+        };
+
+        treesitter = {
+          labels = "asdfghjklqwertyuiopzxcvbnm";
+          jump = {
+            pos = "start";
+            autojump = true;
+          };
+        };
+      };
+
+      prompt = {
+        enabled = true;
+        prefix = [
+          [
+            "キタ━━━(゜∀゜)♥━━━!!!!! "
+            "FlashPromptIcon"
+          ]
+        ];
+      };
+    };
+  };
+
+  plugins.which-key.settings.spec = with lib'.utils.wk; [
+    (mkSpec
+      [
+        "s"
+        { __raw = "function() require('flash').jump() end"; }
+      ]
+      {
+        desc = "Flash Jump";
+        mode = modes.interact;
+      }
+    )
+    (mkSpec
+      [
+        "S"
+        { __raw = "function() require('flash').treesitter() end"; }
+      ]
+      {
+        desc = "Flash Treesitter";
+        mode = modes.interact;
+      }
+    )
+  ];
+
+  colorschemes.catppuccin.settings.integrations.flash = true;
+}
