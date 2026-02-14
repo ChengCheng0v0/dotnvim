@@ -39,6 +39,10 @@
             ];
           };
 
+        homeModules.default = import ./modules/home-manager.nix {
+          inherit inputs self;
+        };
+
         overlays = {
           default = import ./overlays { inherit (nixpkgs) lib; };
         };
