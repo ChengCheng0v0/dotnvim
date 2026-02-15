@@ -6,9 +6,21 @@ local TAB_IS_OIL = '__oil_tab'
 local TAB_ORIGIN_TAB = '__oil_prev_tab'
 local TAB_ORIGIN_WIN = '__oil_prev_win'
 
-local SETUP_DONE_KEY = '__dotnvim_oil_setup'
+local SETUP_DONE_KEY = '__oil_setup'
+local DETAILS_ENABLED_KEY = '__oil_details_enabled'
 
 local PREVIEW_MAX_BYTES = 1024 * 1024
+
+local DEFAULT_COLUMNS = {
+  'icon',
+}
+
+local DETAIL_COLUMNS = {
+  'icon',
+  'permissions',
+  'size',
+  'mtime',
+}
 
 local function oil()
   return require('oil')
@@ -16,6 +28,34 @@ end
 
 local function actions()
   return require('oil.actions')
+end
+
+local function details_enabled()
+  return vim.g[DETAILS_ENABLED_KEY] == true
+end
+
+local function oil_columns()
+  if details_enabled() then
+    return DETAIL_COLUMNS
+  end
+  return DEFAULT_COLUMNS
+end
+
+local function apply_oil_columns()
+  oil().set_columns(oil_columns())
+end
+
+local function format_dir_for_winbar(dir)
+  if not dir or dir == '' then
+    return ''
+  end
+
+  if dir ~= '/' and dir:sub(-1) == '/' then
+    dir = dir:sub(1, -2)
+  end
+
+  dir = vim.fn.fnamemodify(dir, ':~')
+  return dir:gsub('%%', '%%%%')
 end
 
 local function tab_get_var(tab, key)
@@ -237,11 +277,17 @@ function M.setup()
   end
   vim.g[SETUP_DONE_KEY] = true
 
-  local group = vim.api.nvim_create_augroup('DotNvimOilTab', { clear = true })
+  local group = vim.api.nvim_create_augroup('OilUtil', { clear = true })
 
   vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter', 'WinEnter', 'WinClosed', 'TabEnter' }, {
     group = group,
     callback = cleanup_oil_tabs,
+  })
+
+  vim.api.nvim_create_autocmd('FileType', {
+    group = group,
+    pattern = 'oil',
+    callback = apply_oil_columns,
   })
 
   vim.schedule(cleanup_oil_tabs)
@@ -307,8 +353,24 @@ function M.close()
   end
 end
 
+function M.toggle_details()
+  vim.g[DETAILS_ENABLED_KEY] = not details_enabled()
+  apply_oil_columns()
+end
+
 function M.disable_preview(filename)
   return vim.fn.getfsize(filename) > PREVIEW_MAX_BYTES
+end
+
+function M.winbar()
+  local dir = oil().get_current_dir(0) or vim.uv.cwd() or ''
+  dir = format_dir_for_winbar(dir)
+
+  if dir == '' then
+    return ' Oil'
+  end
+
+  return string.format(' Oil %s', dir)
 end
 
 function M.is_always_hidden(name, _)

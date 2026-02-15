@@ -11,9 +11,6 @@
     settings = {
       columns = [
         "icon"
-        "permissions"
-        "size"
-        "mtime"
       ];
 
       watch_for_changes = true;
@@ -34,6 +31,8 @@
       keymaps_help.border = "rounded";
 
       preview_win.disable_preview.__raw = "Utils.oil.disable_preview";
+
+      win_options.winbar = "%!v:lua.Utils.oil.winbar()";
 
       view_options.is_always_hidden.__raw = "Utils.oil.is_always_hidden";
 
@@ -56,6 +55,11 @@
         };
 
         "<space>" = "actions.preview";
+
+        gd = {
+          callback.__raw = "Utils.oil.toggle_details";
+          desc = "Toggle detail view";
+        };
 
         "-" = {
           callback.__raw = "Utils.oil.close";
