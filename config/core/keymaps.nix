@@ -89,40 +89,42 @@
         }
       )
 
-      (mkSpec
-        [
-          "<C-f>"
+      (mkIf config.plugins.noice.enable (
+        mkSpec
+          [
+            "<C-f>"
+            {
+              __raw = /* lua */ ''
+                function()
+                  if not require('noice.lsp').scroll(4) then return '<c-f>' end
+                end
+              '';
+            }
+          ]
           {
-            __raw = /* lua */ ''
-              function()
-                if not require('noice.lsp').scroll(4) then return '<c-f>' end
-              end
-            '';
+            desc = "Scroll Forward";
+            mode = modes.view;
+            expr = true;
           }
-        ]
-        {
-          desc = "Scroll Forward";
-          mode = modes.view;
-          expr = true;
-        }
-      )
-      (mkSpec
-        [
-          "<C-b>"
+      ))
+      (mkIf config.plugins.noice.enable (
+        mkSpec
+          [
+            "<C-b>"
+            {
+              __raw = /* lua */ ''
+                function()
+                  if not require('noice.lsp').scroll(-4) then return '<c-b>' end
+                end
+              '';
+            }
+          ]
           {
-            __raw = /* lua */ ''
-              function()
-                if not require('noice.lsp').scroll(-4) then return '<c-b>' end
-              end
-            '';
+            desc = "Scroll Backward";
+            mode = modes.full;
+            expr = true;
           }
-        ]
-        {
-          desc = "Scroll Backward";
-          mode = modes.full;
-          expr = true;
-        }
-      )
+      ))
 
       (mkSpec [ "j" "v:count == 0 ? 'gj' : 'j'" ] {
         desc = "Down";
