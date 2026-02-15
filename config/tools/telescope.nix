@@ -33,7 +33,15 @@
 
         mappings = {
           i = {
-            "<esc>".__raw = "require('telescope.actions').close";
+            "<esc>".__raw = /* lua */ ''
+              function(bufnr)
+                require('telescope.actions').close(bufnr)
+                vim.schedule(function()
+                  vim.cmd.stopinsert()
+                end)
+              end
+            '';
+
             "<C-j>".__raw = "require('telescope.actions').move_selection_next";
             "<C-k>".__raw = "require('telescope.actions').move_selection_previous";
             "<C-d>".__raw = "require('telescope.actions').results_scrolling_down";
@@ -42,6 +50,15 @@
             "<C-b>".__raw = "require('telescope.actions').preview_scrolling_up";
             "<A-n>".__raw = "require('telescope.actions').cycle_history_next";
             "<A-p>".__raw = "require('telescope.actions').cycle_history_prev";
+
+            "<cr>".__raw = /* lua */ ''
+              function(bufnr)
+                require('telescope.actions').select_default(bufnr)
+                vim.schedule(function()
+                  vim.cmd.stopinsert()
+                end)
+              end
+            '';
           };
           n = { };
         };
