@@ -219,7 +219,8 @@ local actions = {
 
   val = {
     elements.ActionButton('󰈔  New File', 'n', '<leader>fn'),
-    elements.ActionButton('󰙅  Open NeoTree', 'e', '<leader>fe'),
+    elements.ActionButton('󰙅  NeoTree', 'e', '<leader>fe'),
+    elements.ActionButton('󰙅  Oil', '-', '<leader>fo'),
     elements.ActionButton('󱡠  Find Files', 'f', '<leader>ff'),
     elements.ActionButton('󱡠  Live Grep', '/', '<leader>fg'),
     elements.ActionButton('󰊢  Neogit', 'g', '<leader>gg'),
@@ -250,7 +251,7 @@ local section = {
   footer = footer,
 }
 
-local padding_top = elements.DynPaddingTop(0.2)
+local padding_top = elements.DynPaddingTop(0.18)
 
 local config = {
   layout = {
