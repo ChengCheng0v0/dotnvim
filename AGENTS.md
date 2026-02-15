@@ -117,6 +117,11 @@ Guidance for coding agents working in this repository.
 - Nix attrs: lowerCamelCase for option fields where ecosystem expects it.
 - Key descriptions (`desc`) should be title case and action-oriented.
 
+## Commit scope conventions
+
+- For changes under `lua/`, prefer commit scopes that match the owning feature/config area, not just `utils`.
+- Example: changes in `lua/utils/oil.lua` should use `tools/oil` scope (for example: `refactor(tools/oil): ...`).
+
 ## Types and option handling
 
 - In Nix, prefer typed option APIs when defining options (see `options/plugins/im-select.nix` pattern).
