@@ -1,4 +1,9 @@
-{ lib', ... }:
+{
+  config,
+  lib,
+  lib',
+  ...
+}:
 
 {
   plugins.persistence = {
@@ -39,5 +44,45 @@
         mode = modes.interact;
       }
     )
+  ];
+
+  autoCmd = lib.mkIf config.plugins.scope.enable [
+    {
+      group = "HackFix";
+      desc = "Save scope state before persistence session save";
+      event = "User";
+      pattern = "PersistenceSavePre";
+      callback.__raw = /* lua */ ''
+        function()
+          if vim.fn.exists(':ScopeSaveState') == 2 then
+            vim.cmd.ScopeSaveState()
+          end
+        end
+      '';
+    }
+    {
+      group = "HackFix";
+      desc = "Reset scope state before persistence session load";
+      event = "User";
+      pattern = "PersistenceLoadPre";
+      callback.__raw = /* lua */ ''
+        function()
+          vim.g.ScopeState = nil
+        end
+      '';
+    }
+    {
+      group = "HackFix";
+      desc = "Restore scope state after persistence session load";
+      event = "User";
+      pattern = "PersistenceLoadPost";
+      callback.__raw = /* lua */ ''
+        function()
+          if vim.fn.exists(':ScopeLoadState') == 2 then
+            vim.cmd.ScopeLoadState()
+          end
+        end
+      '';
+    }
   ];
 }

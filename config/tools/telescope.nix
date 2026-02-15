@@ -1,4 +1,9 @@
-{ lib', ... }:
+{
+  config,
+  lib,
+  lib',
+  ...
+}:
 
 {
   dependencies.ripgrep.enable = true;
@@ -78,12 +83,18 @@
         };
       };
     };
+
+    luaConfig.post = lib.mkIf config.plugins.scope.enable /* lua */ ''
+      pcall(require('telescope').load_extension, 'scope')
+    '';
   };
 
   plugins.which-key.settings.spec =
     with lib'.utils.wk;
     with lib'.icons;
     let
+      inherit (lib) mkIf;
+
       telescopeIcon = {
         icon = "󱡠";
         color = "azure";
@@ -155,19 +166,46 @@
           mode = modes.interact;
         }
       )
-      (mkSpec
-        [
-          "<leader>fB"
+      (mkIf config.plugins.scope.enable (
+        mkSpec
+          [
+            "<leader>fB"
+            {
+              __raw = /* lua */ ''
+                function()
+                  local telescope = require('telescope')
+                  pcall(telescope.load_extension, 'scope')
+
+                  if telescope.extensions.scope and telescope.extensions.scope.buffers then
+                    telescope.extensions.scope.buffers()
+                    return
+                  end
+
+                  require('telescope.builtin').buffers()
+                end
+              '';
+            }
+          ]
           {
-            __raw = "function() require('telescope.builtin').buffers() end";
+            desc = "Buffers (All Tabs)";
+            icon = telescopeIcon;
+            mode = modes.interact;
           }
-        ]
-        {
-          desc = "Buffers (all)";
-          icon = telescopeIcon;
-          mode = modes.interact;
-        }
-      )
+      ))
+      (mkIf (!config.plugins.scope.enable) (
+        mkSpec
+          [
+            "<leader>fB"
+            {
+              __raw = "function() require('telescope.builtin').buffers() end";
+            }
+          ]
+          {
+            desc = "Buffers (all)";
+            icon = telescopeIcon;
+            mode = modes.interact;
+          }
+      ))
       (mkSpec
         [
           "<leader>fh"
