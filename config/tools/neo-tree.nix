@@ -21,6 +21,7 @@
           "<space>" = "none";
           l = "open";
           h = "close_node";
+          "." = "toggle_hidden";
         };
       };
 
