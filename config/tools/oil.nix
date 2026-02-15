@@ -74,7 +74,7 @@
     (mkSpec
       [
         "<leader>fo"
-        { __raw = "Utils.oil.open_root_tab"; }
+        { __raw = "function() Utils.oil.open_root_tab() end"; }
       ]
       {
         desc = "Explorer Oil (Root Dir)";
@@ -84,7 +84,7 @@
     (mkSpec
       [
         "<leader>fO"
-        { __raw = "Utils.oil.open_cwd_tab"; }
+        { __raw = "function() Utils.oil.open_cwd_tab() end"; }
       ]
       {
         desc = "Explorer Oil (cwd)";
@@ -92,10 +92,15 @@
       }
     )
 
-    (mkSpec [ "-" "<leader>fo" ] {
-      desc = "Explorer Oil (Root Dir)";
-      mode = modes.interact;
-      remap = true;
-    })
+    (mkSpec
+      [
+        "-"
+        { __raw = "function() Utils.oil.open_parent_tab() end"; }
+      ]
+      {
+        desc = "Explorer Oil (Parent Dir)";
+        mode = modes.interact;
+      }
+    )
   ];
 }
