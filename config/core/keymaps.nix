@@ -191,17 +191,6 @@
         remap = true;
       })
 
-      (mkSpec [ "<S-h>" "[b" ] {
-        desc = "Prev Buffer";
-        mode = modes.interact;
-        remap = true;
-      })
-      (mkSpec [ "<S-l>" "]b" ] {
-        desc = "Next Buffer";
-        mode = modes.interact;
-        remap = true;
-      })
-
       (mkSpec [ "[b" "<cmd>bprevious<cr>" ] {
         desc = "Prev Buffer";
         mode = modes.interact;
@@ -241,6 +230,17 @@
         mode = modes.interact;
       })
 
+      (mkSpec [ "<S-h>" "[b" ] {
+        desc = "Prev Buffer";
+        mode = modes.interact;
+        remap = true;
+      })
+      (mkSpec [ "<S-l>" "]b" ] {
+        desc = "Next Buffer";
+        mode = modes.interact;
+        remap = true;
+      })
+
       (mkSpec [ "<leader><tab>[" "<cmd>tabprevious<cr>" ] {
         desc = "Previous Tab";
         mode = modes.interact;
@@ -251,6 +251,14 @@
       })
       (mkSpec [ "<leader><tab><tab>" "<cmd>tabnew<cr>" ] {
         desc = "New Tab";
+        mode = modes.interact;
+      })
+      (mkSpec [ "<leader><tab>d" "<cmd>tabclose<cr>" ] {
+        desc = "Close Tab";
+        mode = modes.interact;
+      })
+      (mkSpec [ "<leader><tab>o" "<cmd>tabonly<cr>" ] {
+        desc = "Close Other Tabs";
         mode = modes.interact;
       })
 
