@@ -104,6 +104,7 @@ Guidance for coding agents working in this repository.
 - Nix:
   - Import local modules with relative paths.
   - Reuse `lib'` helper namespaces instead of duplicating utility logic.
+  - In embedded Lua (`__raw`/`extraConfigLua*`), prefer the global `Utils.<module>` (from `config/luaset.nix`) instead of `require('utils.<module>')`.
 - Lua:
   - Use `require('utils')` and related utility modules consistently.
   - Avoid hard-coding plugin internals when a utility wrapper exists.
