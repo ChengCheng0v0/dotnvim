@@ -15,6 +15,7 @@
         "notify"
         "neo-tree"
         "neo-tree-popup"
+        "oil_preview"
       ];
 
       relculright = true;
