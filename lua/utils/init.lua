@@ -10,6 +10,7 @@ M.root = require('utils.root')
 M.format = require('utils.format')
 M.lualine = require('utils.lualine')
 M.lsp = require('utils.lsp')
+M.oil = require('utils.oil')
 M.wk = require('utils.which-key')
 
 return M

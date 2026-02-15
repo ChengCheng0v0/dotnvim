@@ -1,0 +1,101 @@
+{ lib', ... }:
+
+{
+  plugins.oil = {
+    enable = true;
+
+    luaConfig.pre = /* lua */ ''
+      Utils.oil.setup()
+    '';
+
+    settings = {
+      columns = [
+        "icon"
+        "permissions"
+        "size"
+        "mtime"
+      ];
+
+      watch_for_changes = true;
+      skip_confirm_for_simple_edits = true;
+
+      lsp_file_methods.autosave_changes = "unmodified";
+
+      float = {
+        padding = 2;
+        max_width = 0.9;
+        max_height = 0.9;
+        border = "rounded";
+      };
+
+      confirmation.border = "rounded";
+      progress.border = "rounded";
+      ssh.border = "rounded";
+      keymaps_help.border = "rounded";
+
+      preview_win.disable_preview.__raw = "Utils.oil.disable_preview";
+
+      view_options.is_always_hidden.__raw = "Utils.oil.is_always_hidden";
+
+      use_default_keymaps = false;
+
+      keymaps = {
+        "<C-r>" = "actions.refresh";
+
+        L = {
+          callback.__raw = "Utils.oil.select";
+        };
+        "<cr>" = {
+          callback.__raw = "Utils.oil.select";
+        };
+        H = "actions.parent";
+
+        "<M-l>" = {
+          __unkeyed-1 = "actions.select";
+          opts.vertical = true;
+        };
+
+        "<space>" = "actions.preview";
+
+        "-" = {
+          callback.__raw = "Utils.oil.close";
+        };
+        "<C-w>q" = {
+          callback.__raw = "Utils.oil.close";
+        };
+        "<C-c>" = {
+          callback.__raw = "Utils.oil.close";
+        };
+      };
+    };
+  };
+
+  plugins.which-key.settings.spec = with lib'.utils.wk; [
+    (mkSpec
+      [
+        "<leader>fo"
+        { __raw = "Utils.oil.open_root_tab"; }
+      ]
+      {
+        desc = "Explorer Oil (Root Dir)";
+        mode = modes.interact;
+      }
+    )
+    (mkSpec
+      [
+        "<leader>fO"
+        { __raw = "Utils.oil.open_cwd_tab"; }
+      ]
+      {
+        desc = "Explorer Oil (cwd)";
+        mode = modes.interact;
+      }
+    )
+
+    (mkSpec [ "-" "<leader>fo" ] {
+      desc = "Explorer Oil (Root Dir)";
+      mode = modes.interact;
+      remap = true;
+    })
+  ];
+}
