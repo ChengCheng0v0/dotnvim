@@ -2,9 +2,10 @@ local M = {}
 
 local root = require('utils.root')
 
-local OIL_TAB_KEY = '__oil_tab'
-local OIL_PREV_TAB_KEY = '__oil_prev_tab'
-local OIL_PREV_WIN_KEY = '__oil_prev_win'
+local TAB_IS_OIL = '__oil_tab'
+local TAB_ORIGIN_TAB = '__oil_prev_tab'
+local TAB_ORIGIN_WIN = '__oil_prev_win'
+
 local SETUP_DONE_KEY = '__dotnvim_oil_setup'
 
 local PREVIEW_MAX_BYTES = 1024 * 1024
@@ -17,9 +18,13 @@ local function actions()
   return require('oil.actions')
 end
 
-local function get_tab_var(tab, key)
+local function tab_get_var(tab, key)
   local ok, value = pcall(vim.api.nvim_tabpage_get_var, tab, key)
   return ok and value or nil
+end
+
+local function tab_del_var(tab, key)
+  pcall(vim.api.nvim_tabpage_del_var, tab, key)
 end
 
 local function is_blank_scratch(buf)
@@ -58,6 +63,13 @@ local function close_tab(tab)
     return
   end
 
+  if vim.api.nvim_tabpage_close then
+    local ok = pcall(vim.api.nvim_tabpage_close, tab, false)
+    if ok then
+      return
+    end
+  end
+
   local tabnr = vim.api.nvim_tabpage_get_number(tab)
   vim.cmd(string.format('%dtabclose', tabnr))
 end
@@ -77,16 +89,16 @@ local function resolve_origin()
   local current_tab = vim.api.nvim_get_current_tabpage()
   local current_win = vim.api.nvim_get_current_win()
 
-  if not vim.t[OIL_TAB_KEY] then
+  if vim.t[TAB_IS_OIL] ~= true then
     return current_tab, current_win
   end
 
-  local origin_tab = vim.t[OIL_PREV_TAB_KEY]
+  local origin_tab = vim.t[TAB_ORIGIN_TAB]
   if not (origin_tab and vim.api.nvim_tabpage_is_valid(origin_tab) and origin_tab ~= current_tab) then
     return current_tab, current_win
   end
 
-  local origin_win = vim.t[OIL_PREV_WIN_KEY]
+  local origin_win = vim.t[TAB_ORIGIN_WIN]
   if
     origin_win
     and vim.api.nvim_win_is_valid(origin_win)
@@ -113,6 +125,9 @@ local function resolve_target_tab(current_tab, preferred_tab)
 end
 
 local function join_path(dir, name)
+  if vim.fs and vim.fs.joinpath then
+    return vim.fs.joinpath(dir, name)
+  end
   if dir:sub(-1) == '/' then
     return dir .. name
   end
@@ -123,7 +138,7 @@ local function is_stray_oil_tab(tab)
   if not vim.api.nvim_tabpage_is_valid(tab) then
     return false
   end
-  if get_tab_var(tab, OIL_TAB_KEY) ~= true then
+  if tab_get_var(tab, TAB_IS_OIL) ~= true then
     return false
   end
   if tab_has_oil_window(tab) then
@@ -139,59 +154,130 @@ local function is_stray_oil_tab(tab)
   return is_blank_scratch(buf)
 end
 
-local function cleanup_stray_oil_tabs()
+local function cleanup_oil_tabs()
   for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
-    if is_stray_oil_tab(tab) then
-      vim.schedule(function()
-        if is_stray_oil_tab(tab) then
-          pcall(close_tab, tab)
-        end
-      end)
+    if tab_get_var(tab, TAB_IS_OIL) == true and not tab_has_oil_window(tab) then
+      if is_stray_oil_tab(tab) then
+        vim.schedule(function()
+          if is_stray_oil_tab(tab) then
+            pcall(close_tab, tab)
+          end
+        end)
+      else
+        tab_del_var(tab, TAB_IS_OIL)
+        tab_del_var(tab, TAB_ORIGIN_TAB)
+        tab_del_var(tab, TAB_ORIGIN_WIN)
+      end
     end
   end
 end
 
-local function open_tab(dir)
-  M.setup()
+local function origin_buf()
+  if vim.t[TAB_IS_OIL] ~= true then
+    return nil
+  end
 
+  local origin_win = vim.t[TAB_ORIGIN_WIN]
+  if origin_win and vim.api.nvim_win_is_valid(origin_win) then
+    return vim.api.nvim_win_get_buf(origin_win)
+  end
+
+  local origin_tab = vim.t[TAB_ORIGIN_TAB]
+  if origin_tab and vim.api.nvim_tabpage_is_valid(origin_tab) then
+    local wins = vim.api.nvim_tabpage_list_wins(origin_tab)
+    if wins[1] then
+      return vim.api.nvim_win_get_buf(wins[1])
+    end
+  end
+
+  return nil
+end
+
+local function parent_dir_for_buf(buf)
+  local name = vim.api.nvim_buf_get_name(buf)
+  if name == '' then
+    return nil
+  end
+  -- Skip non-file buffers (oil://, term://, fugitive://, etc.).
+  if name:find('://', 1, true) then
+    return nil
+  end
+
+  if vim.fs and vim.fs.dirname then
+    return vim.fs.dirname(name)
+  end
+  return vim.fn.fnamemodify(name, ':h')
+end
+
+local function open_tab(dir)
+  if not dir or dir == '' then
+    return
+  end
+
+  M.setup()
   local origin_tab, origin_win = resolve_origin()
 
   vim.cmd.tabnew()
   local tabnew_buf = vim.api.nvim_get_current_buf()
-  vim.t[OIL_TAB_KEY] = true
-  vim.t[OIL_PREV_TAB_KEY] = origin_tab
-  vim.t[OIL_PREV_WIN_KEY] = origin_win
+  vim.t[TAB_IS_OIL] = true
+  vim.t[TAB_ORIGIN_TAB] = origin_tab
+  vim.t[TAB_ORIGIN_WIN] = origin_win
 
-  oil().open(dir, nil, function()
+  -- oil.open does not guarantee a callback; schedule cleanup unconditionally.
+  oil().open(dir)
+  vim.schedule(function()
     delete_if_unused_blank_scratch(tabnew_buf)
-    cleanup_stray_oil_tabs()
+    cleanup_oil_tabs()
   end)
 end
 
+function M.setup()
+  if vim.g[SETUP_DONE_KEY] then
+    return
+  end
+  vim.g[SETUP_DONE_KEY] = true
+
+  local group = vim.api.nvim_create_augroup('DotNvimOilTab', { clear = true })
+
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter', 'WinEnter', 'WinClosed', 'TabEnter' }, {
+    group = group,
+    callback = cleanup_oil_tabs,
+  })
+
+  vim.schedule(cleanup_oil_tabs)
+end
+
 function M.open_root_tab()
-  open_tab(root())
+  local buf = origin_buf()
+  open_tab(buf and root.get({ buf = buf }) or root())
 end
 
 function M.open_cwd_tab()
-  open_tab(vim.uv.cwd())
+  open_tab(vim.uv.cwd() or root())
+end
+
+function M.open_parent_tab()
+  local buf = origin_buf() or vim.api.nvim_get_current_buf()
+  local dir = parent_dir_for_buf(buf)
+  open_tab(dir or vim.uv.cwd() or root())
 end
 
 function M.select()
   local entry = oil().get_cursor_entry()
-  if not (vim.t[OIL_TAB_KEY] and entry and entry.type ~= 'directory') then
+  if vim.t[TAB_IS_OIL] ~= true or not entry or entry.type == 'directory' then
     actions().select.callback()
     return
   end
 
   local oil_tab = vim.api.nvim_get_current_tabpage()
-  local target_tab = resolve_target_tab(oil_tab, vim.t[OIL_PREV_TAB_KEY])
+  local target_tab = resolve_target_tab(oil_tab, vim.t[TAB_ORIGIN_TAB])
   local dir = oil().get_current_dir()
-  if not (target_tab and dir) then
+  if not (target_tab and dir and entry.name and entry.name ~= '') then
     actions().select.callback()
     return
   end
 
-  local target_win = vim.t[OIL_PREV_WIN_KEY]
+  local target_win = vim.t[TAB_ORIGIN_WIN]
   local path = join_path(dir, entry.name)
 
   vim.api.nvim_set_current_tabpage(target_tab)
@@ -208,7 +294,7 @@ function M.select()
 end
 
 function M.close()
-  if not vim.t[OIL_TAB_KEY] then
+  if vim.t[TAB_IS_OIL] ~= true then
     actions().close.callback()
     return
   end
@@ -219,21 +305,6 @@ function M.close()
   else
     vim.cmd.tabclose()
   end
-end
-
-function M.setup()
-  if vim.g[SETUP_DONE_KEY] then
-    return
-  end
-  vim.g[SETUP_DONE_KEY] = true
-
-  local group = vim.api.nvim_create_augroup('DotNvimOilTab', { clear = true })
-  vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter', 'WinEnter', 'WinClosed', 'TabEnter' }, {
-    group = group,
-    callback = cleanup_stray_oil_tabs,
-  })
-
-  vim.schedule(cleanup_stray_oil_tabs)
 end
 
 function M.disable_preview(filename)
