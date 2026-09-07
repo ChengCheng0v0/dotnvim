@@ -27,8 +27,8 @@ final: prev: {
         inherit pname version src;
         inherit (prev) pnpm;
         prePnpmInstall = "";
-        fetcherVersion = 3;
-        hash = "sha256-LPjvcOy8qLITdIz+6ZPPKQSlHbUjwCb8JTAM3MqRgUs=";
+        fetcherVersion = 4;
+        hash = "sha256-Nt1y1UXxEf42Zq2ulmss6qkgESl9cwvcomFrWOGjFLk=";
       };
 
       buildPhase = /* bash */ ''
